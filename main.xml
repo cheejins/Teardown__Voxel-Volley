@@ -1,22 +1,27 @@
 <scene version="1.5.4" shadowVolume="200 50 200">
-	<environment template="sunset" fogParams="100 300 1 6"/>
+	<environment template="night" fogParams="100 300 1 6"/>
 	<script file="main.lua"/>
 	<script file="sandbox.lua"/>
 	<spawnpoint pos="0 1 0" rot="0 180 0"/>
 	<instance pos="0.0 0.0 0.0" rot="0.0 180.0 0.0" file="BUILT-IN/prefab/vehicle/land/van_yellow.xml"/>
 	<group pos="0.0 -5.1 75.0" prop0="density=3" prop1="strength=2" prop2="material=concrete">
-		<voxbox pos="-1.0 22.2 -16.2" rot="-90.0 0.0 0.0" prop="true" size="40 80 10" material="wood" color="0.7 0.5 0.3"/>
-		<voxbox pos="-1.0 22.2 -24.2" rot="-90.0 0.0 0.0" prop="true" size="40 80 10" material="wood" color="0.7 0.5 0.3"/>
-		<voxbox pos="-1.0 14.2 -31.6" prop="true" size="40 80 10" material="wood" color="0.7 0.5 0.3"/>
-		<voxbox pos="-1.0 14.2 -25.2" prop="true" size="40 80 20" material="wood" color="0.7 0.5 0.3"/>
-		<voxbox pos="-1.0 14.2 -17.8" prop="true" size="40 80 10" material="wood" color="0.7 0.5 0.3"/>
-		<voxbox pos="-1.0 13.2 -24.2" rot="-90.0 0.0 0.0" prop="true" size="40 80 10" material="wood" color="0.7 0.5 0.3"/>
-		<voxbox pos="-1.0 13.2 -16.2" rot="-90.0 0.0 0.0" prop="true" size="40 80 10" material="wood" color="0.7 0.5 0.3"/>
-		<voxbox pos="-1.0 5.2 -25.2" prop="true" size="40 80 20" material="wood" color="0.7 0.5 0.3"/>
-		<voxbox pos="-1.0 5.2 -33.7" prop="true" size="40 80 30" material="wood" color="0.7 0.5 0.3"/>
-		<voxbox pos="-1.0 5.2 -17.8" prop="true" size="40 80 30" material="wood" color="0.7 0.5 0.3"/>
-		<voxbox pos="-10.0 0.0 -100.0" texture="11" size="200 50 1300" color="0.67 0.67 0.67"/>
+		<voxbox pos="-1.0 31.0 -16.2" rot="-90.0 0.0 0.0" prop="true" size="40 80 10" material="wood" color="0.7 0.5 0.3"/>
+		<voxbox pos="-1.0 31.0 -24.2" rot="-90.0 0.0 0.0" prop="true" size="40 80 10" material="wood" color="0.7 0.5 0.3"/>
+		<voxbox pos="-1.0 23.0 -31.6" prop="true" size="40 80 10" material="wood" color="0.7 0.5 0.3"/>
+		<voxbox pos="-1.0 23.0 -25.2" prop="true" size="40 80 20" material="wood" color="0.7 0.5 0.3"/>
+		<voxbox pos="-1.0 23.0 -17.8" prop="true" size="40 80 10" material="wood" color="0.7 0.5 0.3"/>
+		<voxbox pos="-1.0 22.0 -24.2" rot="-90.0 0.0 0.0" prop="true" size="40 80 10" material="wood" color="0.7 0.5 0.3"/>
+		<voxbox pos="-1.0 22.0 -16.2" rot="-90.0 0.0 0.0" prop="true" size="40 80 10" material="wood" color="0.7 0.5 0.3"/>
+		<voxbox pos="-1.0 14.0 -32.2" prop="true" size="40 80 30" material="wood" color="0.7 0.5 0.3"/>
+		<voxbox pos="-1.0 14.0 -19.2" prop="true" size="40 80 30" material="wood" color="0.7 0.5 0.3"/>
+		<voxbox pos="-1.0 14.0 -25.5" prop="true" size="40 80 30" material="wood" color="0.7 0.5 0.3"/>
+		<voxbox pos="-1.0 13.0 -24.2" rot="-90.0 0.0 0.0" prop="true" size="40 80 10" material="wood" color="0.7 0.5 0.3"/>
+		<voxbox pos="-1.0 13.0 -16.2" rot="-90.0 0.0 0.0" prop="true" size="40 80 10" material="wood" color="0.7 0.5 0.3"/>
+		<voxbox pos="-1.0 5.0 -32.2" prop="true" size="40 80 30" material="wood" color="0.7 0.5 0.3"/>
+		<voxbox pos="-1.0 5.0 -19.2" prop="true" size="40 80 30" material="wood" color="0.7 0.5 0.3"/>
+		<voxbox pos="-1.0 5.0 -25.5" prop="true" size="40 80 30" material="wood" color="0.7 0.5 0.3"/>
 	</group>
+	<voxbox pos="-10.0 -5.1 -25.0" rot="0.0 0.0 0.0" texture="11" size="200 50 1300" color="0.67 0.67 0.67"/>
 	<voxbox tags="unbreakable" pos="-10.0 -0.1 85.0" texture="11" size="200 500 200" color="0.67 0.67 0.67"/>
 </scene>
 

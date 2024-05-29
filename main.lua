@@ -18,6 +18,7 @@ function init()
     ZoomOut = 30
     ZoomOutTarget = 30
 
+    print()
     print("--------[ ANGRY VOXELS ]--------")
     print("             v0.01")
     print("--------------------------------")
@@ -25,6 +26,8 @@ function init()
     for index, body in ipairs(FindBodies("", true)) do
         SetTag(body, "nocull")
     end
+
+    CameraTr = GetCameraTransform()
 
     Vehicle = FindVehicle("", true)
     SetBodyTransform(Vehicle, Transform())
@@ -39,12 +42,17 @@ function init()
     NewShot = true
     ShotFinished = false
 
-    ProjectileStopped = true
+    -- TB_AllBodiesStartTransforms = {}
+    -- AllBodiesStart = FindBodies("", true)
+    -- for _, b in ipairs(AllBodies) do
+    --     TB_AllBodiesStartTransforms[b] = GetBodyTransform(b)
+    -- end
 
 end
 
 function tick()
 
+    -- Check whether to load new projectile.
     if not NewShot and ShotFinished then
         local randomPrefab = GetRandomArrayValue(ProjectilePrefabs)
         local entities = Spawn(randomPrefab, Transform(Vec(), QuatEuler(0, 180, 0)))
@@ -61,20 +69,43 @@ function tick()
     VehicleTr = GetBodyTransform(VehicleBody)
 
 
+    local deleteBodies = {}
     AllBodies = FindBodies("", true)
     for _, b in ipairs(AllBodies) do
-        bodyTr = GetBodyTransform(b)
 
-        bodyTr.pos[1] = clamp(bodyTr.pos[1], -1, 1)
+        -- find debris
+        if b ~= GetToolBody() and b ~= GetWorldBody() and GetBodyVehicle(b) == 0 and GetBodyMass(b) < 100 then
+            table.insert(deleteBodies, b)
+            DrawBodyOutline(b, 1, 0, 0, 1)
+        else
+            -- keep body on XY plane.
+            bodyTr = GetBodyTransform(b)
+            bodyTr.pos[1] = clamp(bodyTr.pos[1], -1, 1)
 
-        local angvel = GetBodyAngularVelocity(b)
-        angvel[2] = 0
-        SetBodyAngularVelocity(b, angvel) -- prevent body from spinning
+            -- prevent body from rotating on y axis
+            -- local bodyEuler = AutoVecSubsituteY(Vec(GetQuatEuler(bodyTr.rot)), 0)
+            -- local bodyRotTarget = QuatEuler(unpack(bodyEuler))
+            -- ConstrainOrientation(b, 0, bodyTr.rot, bodyRotTarget, nil, GetBodyMass(b)/2)
 
-        SetBodyTransform(b, bodyTr)
+            -- prevent body from spinning
+            SetBodyAngularVelocity(b, AutoVecSubsituteY(GetBodyAngularVelocity(b), 0))
+
+            -- apply new body transform
+            SetBodyTransform(b, bodyTr)
+        end
+
+    end
+    for index, db in ipairs(deleteBodies) do -- delete debris bodies.
+        Delete(db)
     end
 
-    if InputDown("rmb") then
+    -- Zoom in and out.
+    ZoomOutTarget = ZoomOut - (InputValue("mousewheel") * 100)
+    ZoomOut = lerp(ZoomOut, ZoomOutTarget, 0.1)
+    ZoomOut = clamp(ZoomOut, 30, 150)
+
+    -- Drag free camera view.
+    if InputDown("rmb") or InputDown("mmb") then
 
         MouseXTarget = MouseX - (InputValue("mousedx")/2)
         MouseYTarget = MouseY + (InputValue("mousedy")/2)
@@ -87,12 +118,8 @@ function tick()
 
     end
 
-    ZoomOutTarget = ZoomOut - (InputValue("mousewheel") * 100)
-    ZoomOut = lerp(ZoomOut, ZoomOutTarget, 0.1)
-    ZoomOut = clamp(ZoomOut, 30, 150)
-
-
-    if ChargeMode and InputReleased("lmb") then -- Release slingshot when mouse is released.
+    -- Release slingshot when mouse is released.
+    if ChargeMode and InputReleased("lmb") then
 
         ChargeMode = false
         ShotFinished = false
@@ -105,7 +132,8 @@ function tick()
         SetBodyVelocity(VehicleBody, VecScale(ChargeVec, -ChargeVelScaleMax))
         ChargeVec = Vec()
 
-    elseif InputDown("lmb") then -- Charge slingshot while mouse is down.
+    -- Charge slingshot while mouse is down.
+    elseif InputDown("lmb") then
 
         ChargeMode = true -- charge mode will now hold until released.
         ShotFinished = false
@@ -128,27 +156,29 @@ function tick()
     end
 
 
-    local camTr = nil
     local projectileIsMoving = VecLength(GetBodyVelocity(VehicleBody)) > 0.5
 
+
     if WatchProjectile and projectileIsMoving then
-        camTr = Transform(Vec(-ZoomOut, 0, 0), QuatEuler(0, -90, 0))
-        camTr.pos = VecAdd(camTr.pos, VehicleTr.pos)
+        CameraTr = Transform(Vec(-ZoomOut, 0, 0), QuatEuler(0, -90, 0))
+        CameraTr.pos = VecAdd(CameraTr.pos, VehicleTr.pos)
     else
-        camTr = Transform(Vec(-ZoomOut, MouseY, MouseX), QuatEuler(0, -90, 0))
+        CameraTr = Transform(Vec(-ZoomOut, MouseY, MouseX), QuatEuler(0, -90, 0))
     end
 
+    -- Shot has ended.
     if not NewShot and not ChargeMode and not projectileIsMoving then
         WatchProjectile = false
         ShotFinished = true
     end
 
-    SetCameraTransform(camTr)
+
+    SetCameraTransform(CameraTr)
     SetCameraFov(30)
 
 
     -- Debug
-    DebugLine(Vec(), Vec(0, 10, 0), 1,1,1, 1)
+    DrawDot(Vec(), Vec(0, -1, 0), 0.5, 0.5, 0.5, 0.5)
     DebugWatch("mousedx", InputValue("mousedx"))
     DebugWatch("mousedy", InputValue("mousedy"))
     DebugWatch("MouseX", MouseX)
@@ -157,7 +187,8 @@ function tick()
     DebugWatch("ChargeVec", ChargeVec)
     DebugWatch("VehicleVel", GetBodyVelocity(VehicleBody))
     DebugWatch("projectileIsMoving", projectileIsMoving)
-
-    DrawBodyOutline(VehicleBody, 1, 1, 1, 1)
+    DebugWatch("WatchProjectile", WatchProjectile)
+    DebugWatch("ShotFinished", ShotFinished)
+    DrawBodyOutline(VehicleBody, 0.5, 0.5, 0.5, 0.5)
 
 end
