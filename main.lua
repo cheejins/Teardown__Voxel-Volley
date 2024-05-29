@@ -89,7 +89,7 @@ function tick()
 
     ZoomOutTarget = ZoomOut - (InputValue("mousewheel") * 100)
     ZoomOut = lerp(ZoomOut, ZoomOutTarget, 0.1)
-    ZoomOut = clamp(ZoomOut, 30, 120)
+    ZoomOut = clamp(ZoomOut, 30, 150)
 
 
     if ChargeMode and InputReleased("lmb") then -- Release slingshot when mouse is released.
@@ -144,7 +144,7 @@ function tick()
     end
 
     SetCameraTransform(camTr)
-    SetCameraFov(30 + ZoomOut/2)
+    SetCameraFov(30)
 
 
     -- Debug
@@ -157,5 +157,7 @@ function tick()
     DebugWatch("ChargeVec", ChargeVec)
     DebugWatch("VehicleVel", GetBodyVelocity(VehicleBody))
     DebugWatch("projectileIsMoving", projectileIsMoving)
+
+    DrawBodyOutline(VehicleBody, 1, 1, 1, 1)
 
 end

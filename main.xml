@@ -1,5 +1,5 @@
 <scene version="1.5.4" shadowVolume="200 50 200">
-	<environment template="sunset"/>
+	<environment template="sunset" fogParams="100 300 1 6"/>
 	<script file="main.lua"/>
 	<script file="sandbox.lua"/>
 	<spawnpoint pos="0 1 0" rot="0 180 0"/>
