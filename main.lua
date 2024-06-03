@@ -8,30 +8,27 @@ REG = { ModData = "savegame.mod.data.mod" }
 
 function init()
 
+    -- Holds all reg primitive values (magic tables are not iterable)
     ModData = util.structured_table(REG.ModData)
 
+    -- init camera
+    CameraTr = GetCameraTransform()
+    CameraEnabled = true
     MouseX = 0
     MouseY = 0
     MouseXTarget = 0
     MouseYTarget = 0
-
     ZoomOut = 30
     ZoomOutTarget = 30
 
-    print()
-    print("--------[ ANGRY VOXELS ]--------")
-    print("             v0.01")
-    print("--------------------------------")
+    -- init map bounds
+    MouseLimitsX = { -25, 150 }
+    MouseLimitsY = { 2, 10 }
+    CameraBounds = {
+        Vec(0, MouseLimitsY[1], MouseLimitsX[1]),
+        Vec(0, MouseLimitsY[2], MouseLimitsX[2])}
 
-    for index, body in ipairs(FindBodies("", true)) do
-        SetTag(body, "nocull")
-    end
-
-    CameraTr = GetCameraTransform()
-
-    Vehicle = FindVehicle("", true)
-    SetBodyTransform(Vehicle, Transform())
-
+    -- init slingshot
     ChargeMode = false
     ChargeVec = Vec()
     ChargeMouseX = 0
@@ -39,18 +36,25 @@ function init()
     ChargeVelScaleMax = 7.5
     WatchProjectile = false
 
+    -- init shot
     NewShot = true
     ShotFinished = false
 
-    -- TB_AllBodiesStartTransforms = {}
-    -- AllBodiesStart = FindBodies("", true)
-    -- for _, b in ipairs(AllBodies) do
-    --     TB_AllBodiesStartTransforms[b] = GetBodyTransform(b)
-    -- end
+    print()
+    print("--------[ ANGRY VOXELS ]--------")
+    print("             v0.01")
+    print("--------------------------------")
+
+    Vehicle = FindVehicle("", true)
+
+    -- nocull scene
+    for index, body in ipairs(FindBodies("", true)) do SetTag(body, "nocull") end
 
 end
 
 function tick()
+
+    if InputPressed("r") then CameraEnabled = not CameraEnabled end
 
     -- Check whether to load new projectile.
     if not NewShot and ShotFinished then
@@ -79,42 +83,39 @@ function tick()
             DrawBodyOutline(b, 1, 0, 0, 1)
         else
             -- keep body on XY plane.
-            bodyTr = GetBodyTransform(b)
-            bodyTr.pos[1] = clamp(bodyTr.pos[1], -1, 1)
+            local bodyTr = GetBodyTransform(b)
+            bodyTr.pos[1] = clamp(bodyTr.pos[1], -0.5, 0.5)
 
             -- prevent body from rotating on y axis
-            -- local bodyEuler = AutoVecSubsituteY(Vec(GetQuatEuler(bodyTr.rot)), 0)
-            -- local bodyRotTarget = QuatEuler(unpack(bodyEuler))
-            -- ConstrainOrientation(b, 0, bodyTr.rot, bodyRotTarget, nil, GetBodyMass(b)/2)
+            local bodyRot = GetBodyTransform(b).rot
+            bodyRot = Vec(GetQuatEuler(bodyRot))
+            DebugWatch("bodyRot", bodyRot)
 
-            -- prevent body from spinning
             SetBodyAngularVelocity(b, AutoVecSubsituteY(GetBodyAngularVelocity(b), 0))
+            SetBodyVelocity(b, AutoVecSubsituteX(GetBodyVelocity(b), 0))
 
-            -- apply new body transform
-            SetBodyTransform(b, bodyTr)
+            SetBodyTransform(b, bodyTr) -- apply new body transform
         end
 
     end
-    for index, db in ipairs(deleteBodies) do -- delete debris bodies.
-        Delete(db)
-    end
+    for index, db in ipairs(deleteBodies) do Delete(db) end -- delete small debris bodies.
 
     -- Zoom in and out.
     ZoomOutTarget = ZoomOut - (InputValue("mousewheel") * 100)
     ZoomOut = lerp(ZoomOut, ZoomOutTarget, 0.1)
     ZoomOut = clamp(ZoomOut, 30, 150)
 
-    -- Drag free camera view.
-    if InputDown("rmb") or InputDown("mmb") then
+    -- drag free camera view.
+    if not InputDown("lmb") and not InputDown("rmb") and not InputDown("mmb") then
 
-        MouseXTarget = MouseX - (InputValue("mousedx")/2)
-        MouseYTarget = MouseY + (InputValue("mousedy")/2)
+        MouseXTarget = MouseX + (InputValue("mousedx")/2)
+        MouseYTarget = MouseY - (InputValue("mousedy")/2)
 
         MouseX = lerp(MouseX, MouseXTarget, 0.1)
         MouseY = lerp(MouseY, MouseYTarget, 0.1)
 
-        MouseY = clamp(MouseY, 0, 10)
-        MouseX = clamp(MouseX, -50, 150)
+        MouseX = clamp(MouseX, MouseLimitsX[1], MouseLimitsX[2])
+        MouseY = clamp(MouseY, MouseLimitsY[1], MouseLimitsY[2])
 
     end
 
@@ -143,9 +144,12 @@ function tick()
         chargeVecPre[3] = chargeVecPre[3] + (InputValue("mousedx")/50)
         chargeVecPre[2] = chargeVecPre[2] - (InputValue("mousedy")/50)
 
-        if VecLength(chargeVecPre) < ChargeVelScaleMax then
-            ChargeVec[3] = chargeVecPre[3]
-            ChargeVec[2] = chargeVecPre[2]
+        ChargeVec[3] = chargeVecPre[3]
+        ChargeVec[2] = chargeVecPre[2]
+
+        -- prevent charger spin locking
+        if VecLength(chargeVecPre) >= ChargeVelScaleMax then
+            ChargeVec = VecScale(VecNormalize(ChargeVec), ChargeVelScaleMax)
         end
 
         DrawDot(Vec(), 1,1, 1,1,1, 1)
@@ -173,12 +177,13 @@ function tick()
     end
 
 
-    SetCameraTransform(CameraTr)
-    SetCameraFov(30)
+    if CameraEnabled then
+        SetCameraTransform(CameraTr)
+        SetCameraFov(30)
+    end
 
 
     -- Debug
-    DrawDot(Vec(), Vec(0, -1, 0), 0.5, 0.5, 0.5, 0.5)
     DebugWatch("mousedx", InputValue("mousedx"))
     DebugWatch("mousedy", InputValue("mousedy"))
     DebugWatch("MouseX", MouseX)
@@ -189,6 +194,9 @@ function tick()
     DebugWatch("projectileIsMoving", projectileIsMoving)
     DebugWatch("WatchProjectile", WatchProjectile)
     DebugWatch("ShotFinished", ShotFinished)
+
+    DrawDot(Vec(), Vec(0, -1, 0), 0.5, 0.5, 0.5, 0.5)
     DrawBodyOutline(VehicleBody, 0.5, 0.5, 0.5, 0.5)
+    AabbDraw(CameraBounds[1], CameraBounds[2], 1,1,0, 0.5)
 
 end
