@@ -1,6 +1,6 @@
-name = Angry Birds
+name = Voxel Volley
 author = Cheejins
-description = [noupload] Basically a rip off of angry birds
+description = [noupload] Angry birds in Teardown.
 tags = Gameplay
 
 # If description contains [noupload] the description on Steam workshop will not be overwritten.
